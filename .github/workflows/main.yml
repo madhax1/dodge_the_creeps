@@ -25,20 +25,14 @@ jobs:
       # your project is available for Godot to export
     - name: checkout
       uses: actions/checkout@v4
-  
     - name: export game
       id: export
-      # Use latest version (see releases for all versions)
       uses: firebelley/godot-export@v6.0.0
       with:
-        # Defining all the required inputs
         godot_executable_download_url: https://github.com/godotengine/godot/releases/download/4.3-stable/Godot_v4.3-stable_linux.x86_64.zip
         godot_export_templates_download_url: https://github.com/godotengine/godot/releases/download/4.3-stable/Godot_v4.3-stable_export_templates.tpz
         relative_project_path: ./
         archive_output: true
-
-      # This release action has worked well for me. However, you can most likely use any release action of your choosing.
-      # https://github.com/ncipollo/release-action
     - name: create release
       uses: ncipollo/release-action@v1.14.0
       with:
@@ -46,21 +40,6 @@ jobs:
         generateReleaseNotes: true
         tag: ${{ github.ref_name }}
         artifacts: ${{ steps.export.outputs.archive_directory }}/*
-
-    - name: Run ls
-      run: |
-        ls ${{ steps.export.outputs.archive_directory }}/*
-    - name: Set Version
-      run: |
-        echo "version=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
-    # - name: Upload to itch.io project
-    #   uses: robpc/itchio-upload-action@v1
-    #   with:
-    #     path: ${{ steps.export.outputs.build_directory }}/
-    #     project: ${{ env.itchio_project }}
-    #     channel: ${{ env.itchio_channel }}
-    #     version: ${{ github.ref_name }}
-    #     api-key: ${{ secrets.ITCHIO_API_KEY }}
     - name: Upload to itch.io
       run: |
         curl -L -o butler.zip https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default
