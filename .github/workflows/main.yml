@@ -4,6 +4,11 @@ on:
     tags:
       - "v*"
 
+env:
+  itchio_project: madhax1/dodge-the-creeps
+  itchio_channel: HTML
+
+
 jobs:
   # job id, can be anything
   export_game:
@@ -39,3 +44,12 @@ jobs:
         generateReleaseNotes: true
         tag: ${{ github.ref_name }}
         artifacts: ${{ steps.export.outputs.archive_directory }}/*
+
+    - name: Upload to itch.io project
+      uses: robpc/itchio-upload-action@v1
+      with:
+        path: ${{ steps.export.outputs.archive_directory }}/*
+        project: ${{ env.itchio_project }}
+        channel: ${{ env.itchio_channel }}
+        version: ${{ github.ref_name }}
+        api-key: ${{ secrets.ITCHIO_API_KEY }}
