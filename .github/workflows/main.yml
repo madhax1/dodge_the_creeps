@@ -5,8 +5,10 @@ on:
       - "v*"
 
 env:
-  itchio_project: madhax1/dodge-the-creeps
+  itchio_account: madhax1
+  itchio_project: dodge-the-creeps
   itchio_channel: HTML
+  BUTLER_API_KEY: ${{ secrets.ITCHIO_API_KEY }}
 
 
 jobs:
@@ -45,11 +47,23 @@ jobs:
         tag: ${{ github.ref_name }}
         artifacts: ${{ steps.export.outputs.archive_directory }}/*
 
-    - name: Upload to itch.io project
-      uses: robpc/itchio-upload-action@v1
-      with:
-        path: ${{ steps.export.outputs.archive_directory }}/*
-        project: ${{ env.itchio_project }}
-        channel: ${{ env.itchio_channel }}
-        version: ${{ github.ref_name }}
-        api-key: ${{ secrets.ITCHIO_API_KEY }}
+    - name: Run ls
+      run: |
+        ls ${{ steps.export.outputs.archive_directory }}/*
+    - name: Set Version
+      run: |
+        echo "version=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
+    # - name: Upload to itch.io project
+    #   uses: robpc/itchio-upload-action@v1
+    #   with:
+    #     path: ${{ steps.export.outputs.build_directory }}/
+    #     project: ${{ env.itchio_project }}
+    #     channel: ${{ env.itchio_channel }}
+    #     version: ${{ github.ref_name }}
+    #     api-key: ${{ secrets.ITCHIO_API_KEY }}
+    - name: Upload to itch.io
+      run: |
+        curl -L -o butler.zip https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default
+        unzip butler.zip
+        chmod +x butler
+        ./butler push ${{ steps.export.outputs.build_directory }} ${{ env.itchio_account }}/${{ env.itchio_project }}:${{ env.itchio_channel }}
